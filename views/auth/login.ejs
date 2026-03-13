@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Car Rental</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .card { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h1 { margin-bottom: 20px; text-align: center; color: #333; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; border: none; border-radius: 4px; background: #007bff; color: #fff; font-size: 16px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .message { margin-top: 12px; text-align: center; font-size: 14px; }
+        .back-link { display: block; margin-top: 12px; text-align: center; color: #007bff; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required />
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required />
+
+            <button type="submit">Login</button>
+        </form>
+        <div id="message" class="message"></div>
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const messageEl = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            messageEl.textContent = 'Signing in...';
+
+            const payload = {
+                username: form.username.value,
+                password: form.password.value,
+            };
+
+            try {
+                const res = await fetch('/auth/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    messageEl.textContent = data.message || 'Login failed';
+                    messageEl.style.color = 'red';
+                    return;
+                }
+
+                // Store token in localStorage for API calls
+                localStorage.setItem('authToken', data.token);
+                messageEl.textContent = 'Login successful! Token stored in browser.';
+                messageEl.style.color = 'green';
+            } catch (error) {
+                messageEl.textContent = 'Error: ' + error.message;
+                messageEl.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
+

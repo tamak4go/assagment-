@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Booking - Car Rental System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; background: #f4f4f4; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        header { background: #333; color: #fff; padding: 20px 0; margin-bottom: 20px; }
+        header .container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; }
+        nav ul { list-style: none; display: flex; gap: 20px; }
+        nav a { color: #fff; text-decoration: none; padding: 10px 20px; background: #555; border-radius: 5px; }
+        nav a:hover { background: #666; }
+        .card { background: #fff; padding: 30px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 20px; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #007bff; }
+        .btn { display: inline-block; padding: 12px 30px; background: #333; color: #fff; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .btn-primary { background: #007bff; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .price-info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .price-info h4 { margin-bottom: 10px; }
+        .price-info p { margin: 5px 0; }
+        .total-amount { font-size: 18px; font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🚗 Car Rental System</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/cars">Cars</a></li>
+                    <li><a href="/bookings">Bookings</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        <div class="card">
+            <h2>📋 Create New Booking</h2>
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="customerName">Customer Name *</label>
+                    <input type="text" id="customerName" name="customerName" required placeholder="e.g., Nguyen Van A">
+                </div>
+                <div class="form-group">
+                    <label for="carNumber">Select Car *</label>
+                    <select id="carNumber" name="carNumber" required onchange="updatePriceInfo()">
+                        <option value="">-- Select a car --</option>
+                        <% cars.forEach(car => { %>
+                            <option value="<%= car.carNumber %>" data-price="<%= car.pricePerDay %>" data-capacity="<%= car.capacity %>" data-features="<%= car.features.join(', ') %>">
+                                <%= car.carNumber %> - <%= car.capacity %> seats - <%= car.pricePerDay.toLocaleString() %> VND/day (<%= car.status %>)
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date *</label>
+                    <input type="date" id="startDate" name="startDate" required onchange="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date *</label>
+                    <input type="date" id="endDate" name="endDate" required onchange="calculateTotal()">
+                </div>
+                <div class="price-info" id="priceInfo" style="display: none;">
+                    <h4>💰 Price Calculation</h4>
+                    <p>Price per day: <span id="pricePerDay">0</span> VND</p>
+                    <p>Number of days: <span id="numDays">0</span></p>
+                    <p class="total-amount">Total Amount: <span id="totalAmount">0</span> VND</p>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Create Booking</button>
+                    <a href="/bookings" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script>
+        function updatePriceInfo() {
+            const carSelect = document.getElementById('carNumber');
+            const selectedOption = carSelect.options[carSelect.selectedIndex];
+            
+            if (selectedOption.value) {
+                const price = selectedOption.dataset.price;
+                document.getElementById('pricePerDay').textContent = parseInt(price).toLocaleString();
+                calculateTotal();
+            }
+        }
+
+        function calculateTotal() {
+            const carSelect = document.getElementById('carNumber');
+            const selectedOption = carSelect.options[carSelect.selectedIndex];
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const priceInfo = document.getElementById('priceInfo');
+
+            if (selectedOption.value && startDate && endDate) {
+                const price = parseInt(selectedOption.dataset.price);
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays > 0) {
+                    const total = diffDays * price;
+                    document.getElementById('numDays').textContent = diffDays;
+                    document.getElementById('totalAmount').textContent = total.toLocaleString();
+                    priceInfo.style.display = 'block';
+                }
+            } else {
+                priceInfo.style.display = 'none';
+            }
+        }
+
+        document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                customerName: document.getElementById('customerName').value,
+                carNumber: document.getElementById('carNumber').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value
+            };
+
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    alert('You must login first.');
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                const response = await fetch('/bookings', {
+                    method: 'POST',
+                    headers: Object.assign(
+                        { 'Content-Type': 'application/json' },
+                        token ? { 'Authorization': 'Bearer ' + token } : {}
+                    ),
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Booking created successfully! Total: ' + result.totalAmount.toLocaleString() + ' VND');
+                    window.location.href = '/bookings';
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Booking - Car Rental System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; background: #f4f4f4; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        header { background: #333; color: #fff; padding: 20px 0; margin-bottom: 20px; }
+        header .container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; }
+        nav ul { list-style: none; display: flex; gap: 20px; }
+        nav a { color: #fff; text-decoration: none; padding: 10px 20px; background: #555; border-radius: 5px; }
+        nav a:hover { background: #666; }
+        .card { background: #fff; padding: 30px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 20px; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #007bff; }
+        .btn { display: inline-block; padding: 12px 30px; background: #333; color: #fff; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .btn-primary { background: #007bff; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .current-info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .current-info p { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🚗 Car Rental System</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/cars">Cars</a></li>
+                    <li><a href="/bookings">Bookings</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        <div class="card">
+            <h2>✏️ Edit Booking</h2>
+            <div class="current-info">
+                <p><strong>Booking ID:</strong> <%= booking._id %></p>
+                <p><strong>Current Total:</strong> <%= booking.totalAmount.toLocaleString() %> VND</p>
+                <p><strong>Status:</strong> <%= booking.status %></p>
+            </div>
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="customerName">Customer Name *</label>
+                    <input type="text" id="customerName" name="customerName" required value="<%= booking.customerName %>">
+                </div>
+                <div class="form-group">
+                    <label for="carNumber">Select Car *</label>
+                    <select id="carNumber" name="carNumber" required>
+                        <% cars.forEach(car => { %>
+                            <option value="<%= car.carNumber %>" data-price="<%= car.pricePerDay %>" <%= car.carNumber === booking.carNumber ? 'selected' : '' %>>
+                                <%= car.carNumber %> - <%= car.capacity %> seats - <%= car.pricePerDay.toLocaleString() %> VND/day
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date *</label>
+                    <input type="date" id="startDate" name="startDate" required value="<%= new Date(booking.startDate).toISOString().split('T')[0] %>">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date *</label>
+                    <input type="date" id="endDate" name="endDate" required value="<%= new Date(booking.endDate).toISOString().split('T')[0] %>">
+                </div>
+
+                <div class="form-group">
+                    <label for="lateDays">Overdue Days (only when completed)</label>
+                    <input
+                        type="number"
+                        id="lateDays"
+                        name="lateDays"
+                        min="0"
+                        step="1"
+                        value="<%= booking.lateDays || 0 %>"
+                        <%= booking.status === 'completed' ? '' : 'disabled' %>
+                    >
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Update Booking</button>
+                    <a href="/bookings" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script>
+        document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const bookingId = '<%= booking._id %>';
+            const formData = {
+                customerName: document.getElementById('customerName').value,
+                carNumber: document.getElementById('carNumber').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                lateDays: document.getElementById('lateDays') && !document.getElementById('lateDays').disabled
+                    ? Number(document.getElementById('lateDays').value || 0)
+                    : undefined
+            };
+
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    alert('You must login first.');
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                const response = await fetch('/bookings/' + bookingId, {
+                    method: 'PUT',
+                    headers: Object.assign(
+                        { 'Content-Type': 'application/json' },
+                        token ? { 'Authorization': 'Bearer ' + token } : {}
+                    ),
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Booking updated successfully! New Total: ' + result.totalAmount.toLocaleString() + ' VND');
+                    window.location.href = '/bookings';
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

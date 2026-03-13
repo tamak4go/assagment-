@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Rental Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; background: #f4f4f4; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: #333; color: #fff; padding: 20px 0; margin-bottom: 20px; }
+        header .container { display: flex; justify-content: space-between; align-items: center; }
+        nav ul { list-style: none; display: flex; gap: 20px; }
+        nav a { color: #fff; text-decoration: none; padding: 10px 20px; background: #555; border-radius: 5px; }
+        nav a:hover { background: #666; }
+        .hero { text-align: center; padding: 60px 20px; background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .hero h2 { font-size: 36px; margin-bottom: 20px; color: #333; }
+        .hero p { font-size: 18px; color: #666; margin-bottom: 30px; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .card { background: #fff; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card h3 { margin-bottom: 15px; color: #333; }
+        .card p { color: #666; margin-bottom: 20px; }
+        .btn { display: inline-block; padding: 12px 30px; background: #007bff; color: #fff; text-decoration: none; border-radius: 5px; }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🚗 Car Rental System</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/cars">Cars</a></li>
+                    <li><a href="/bookings">Bookings</a></li>
+                    <li><a href="/auth/login">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        <div class="hero">
+            <h2>Welcome to Car Rental Management</h2>
+            <p>Manage your car fleet and bookings efficiently</p>
+        </div>
+        <div class="cards">
+            <div class="card">
+                <h3>🚙 Manage Cars</h3>
+                <p>Add, edit, and manage your car inventory. Track availability and maintenance status.</p>
+                <a href="/cars" class="btn">View Cars</a>
+            </div>
+            <div class="card">
+                <h3>📋 Manage Bookings</h3>
+                <p>Create and manage customer bookings. Automatic payment calculation included.</p>
+                <a href="/bookings" class="btn">View Bookings</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
