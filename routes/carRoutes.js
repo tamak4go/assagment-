@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const carController = require('../controllers/carController');
-const { authenticateJWT } = require('../middleware/authMiddleware');
+const { authenticateJWT, requireAuthPage } = require('../middleware/authMiddleware');
 
 // View routes
-router.get('/', carController.getAllCars);
-router.get('/create', carController.renderCreateForm);
-router.get('/edit/:carNumber', carController.renderEditForm);
+router.get('/', requireAuthPage, carController.getAllCars);
+router.get('/create', requireAuthPage, carController.renderCreateForm);
+router.get('/edit/:carNumber', requireAuthPage, carController.renderEditForm);
 
 // API routes
 router.get('/api', authenticateJWT, carController.getAllCarsAPI);

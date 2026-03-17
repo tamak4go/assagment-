@@ -78,6 +78,14 @@
                 messageEl.style.color = 'red';
             }
         });
+
+        // Keep localStorage in sync when server-side logout clears cookie.
+        window.addEventListener('pageshow', () => {
+            // If cookie is gone (logout), clear token to avoid stale UI state.
+            if (!document.cookie.includes('authToken=')) {
+                localStorage.removeItem('authToken');
+            }
+        });
     </script>
 </body>
 </html>

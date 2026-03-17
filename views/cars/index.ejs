@@ -43,6 +43,7 @@
                     <li><a href="/">Home</a></li>
                     <li><a href="/cars">Cars</a></li>
                     <li><a href="/bookings">Bookings</a></li>
+                    <li><a href="/auth/logout" id="navLogout">Logout</a></li>
                 </ul>
             </nav>
         </div>
@@ -97,6 +98,18 @@
         </div>
     </main>
     <script>
+        // Ensure browser token is available for API calls
+        if (!localStorage.getItem('authToken')) {
+            window.location.href = '/auth/login';
+        }
+
+        const logoutEl = document.getElementById('navLogout');
+        if (logoutEl) {
+            logoutEl.addEventListener('click', () => {
+                localStorage.removeItem('authToken');
+            });
+        }
+
         async function deleteCar(carNumber) {
             if (!confirm('Are you sure you want to delete this car?')) return;
 

@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/bookingController');
-const { authenticateJWT } = require('../middleware/authMiddleware');
+const { authenticateJWT, requireAuthPage } = require('../middleware/authMiddleware');
 
 // View routes
-router.get('/', bookingController.getAllBookings);
-router.get('/create', bookingController.renderCreateForm);
-router.get('/edit/:bookingId', bookingController.renderEditForm);
+router.get('/', requireAuthPage, bookingController.getAllBookings);
+router.get('/create', requireAuthPage, bookingController.renderCreateForm);
+router.get('/edit/:bookingId', requireAuthPage, bookingController.renderEditForm);
 
 // API routes
 router.get('/api', authenticateJWT, bookingController.getAllBookingsAPI);

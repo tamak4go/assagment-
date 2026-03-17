@@ -2,14 +2,30 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'CHANGE_ME_SECRET_KEY';
 
-const authenticateJWT = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Authorization header missing or invalid' });
+function getTokenFromCookies(cookieHeader) {
+  if (!cookieHeader) return null;
+  const parts = cookieHeader.split(';').map(p => p.trim());
+  for (const part of parts) {
+    if (part.startsWith('authToken=')) {
+      return decodeURIComponent(part.substring('authToken='.length));
+    }
   }
+  return null;
+}
 
-  const token = authHeader.split(' ')[1];
+function getTokenFromRequest(req) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+  return getTokenFromCookies(req.headers.cookie);
+}
+
+const authenticateJWT = (req, res, next) => {
+  const token = getTokenFromRequest(req);
+  if (!token) {
+    return res.status(401).json({ message: 'Missing auth token' });
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -20,7 +36,23 @@ const authenticateJWT = (req, res, next) => {
   }
 };
 
+const requireAuthPage = (req, res, next) => {
+  const token = getTokenFromRequest(req);
+  if (!token) {
+    return res.redirect('/auth/login');
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    return next();
+  } catch (error) {
+    return res.redirect('/auth/login');
+  }
+};
+
 module.exports = {
   authenticateJWT,
+  requireAuthPage,
 };
 

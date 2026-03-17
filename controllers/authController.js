@@ -4,6 +4,14 @@ const User = require('../models/userModel');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'CHANGE_ME_SECRET_KEY';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
+const AUTH_COOKIE_NAME = 'authToken';
+
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  path: '/',
+});
 
 // Render login page
 const renderLogin = (req, res) => {
@@ -74,6 +82,12 @@ const login = async (req, res) => {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
+    // Also set a cookie so server-rendered pages can be protected/redirected.
+    res.cookie(AUTH_COOKIE_NAME, token, {
+      ...getCookieOptions(),
+      maxAge: 1000 * 60 * 60, // 1 hour
+    });
+
     return res.status(200).json({
       message: 'Login successful',
       token,
@@ -88,9 +102,15 @@ const login = async (req, res) => {
   }
 };
 
+const logout = (req, res) => {
+  res.clearCookie(AUTH_COOKIE_NAME, getCookieOptions());
+  return res.redirect('/');
+};
+
 module.exports = {
   renderLogin,
   register,
   login,
+  logout,
 };
 
