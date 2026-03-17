@@ -66,8 +66,13 @@
 
                 // Store token in localStorage for API calls
                 localStorage.setItem('authToken', data.token);
-                messageEl.textContent = 'Login successful! Token stored in browser.';
+                messageEl.textContent = 'Login successful! Redirecting...';
                 messageEl.style.color = 'green';
+
+                // Redirect after login
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 300);
             } catch (error) {
                 messageEl.textContent = 'Error: ' + error.message;
                 messageEl.style.color = 'red';
